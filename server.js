@@ -89,11 +89,9 @@ app.get('/api/get-otp/:tzid', async (req, res) => {
     }
 });
 
-// For Local Testing & Stability fallback
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+// Serve frontend dashboard fallback for safety
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// 🚀 CRITICAL FOR VERCEL: Express instance ko module exports karna lazmi hai
 module.exports = app;
