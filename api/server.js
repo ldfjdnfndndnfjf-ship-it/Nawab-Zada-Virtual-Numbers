@@ -21,7 +21,7 @@ app.post('/api/verify-auth', (req, res) => {
     res.json({ success: false, message: "Invalid access key restriction." });
 });
 
-// 1. ROUTE: Get Available Services/Categories (Publicly Viewable)
+// 1. ROUTE: Get Available Services/Categories
 app.get('/api/get-services', async (req, res) => {
     try {
         const response = await axios.get(`${API_BASE}/getServiceList.php`, {
@@ -33,7 +33,7 @@ app.get('/api/get-services', async (req, res) => {
     }
 });
 
-// 2. ROUTE: Buy / Request Virtual Number (Protected via Header validation check)
+// 2. ROUTE: Buy / Request Virtual Number
 app.post('/api/get-number', async (req, res) => {
     try {
         const userToken = req.headers['x-auth-token'];
@@ -64,7 +64,7 @@ app.post('/api/get-number', async (req, res) => {
     }
 });
 
-// 3. ROUTE: Check Live Dynamic OTP Status (Protected)
+// 3. ROUTE: Check Live Dynamic OTP Status
 app.get('/api/get-otp/:tzid', async (req, res) => {
     try {
         const userToken = req.headers['x-auth-token'];
@@ -89,9 +89,9 @@ app.get('/api/get-otp/:tzid', async (req, res) => {
     }
 });
 
-// Serve frontend dashboard fallback for safety
-app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
+// Fallback for other API routes
+app.use('/api/*', (req, res) => {
+    res.status(404).json({ success: false, message: "API Route Not Found" });
 });
 
 module.exports = app;
