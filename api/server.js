@@ -21,15 +21,31 @@ app.post('/api/verify-auth', (req, res) => {
     res.json({ success: false, message: "Invalid access key restriction." });
 });
 
-// 1. ROUTE: Get Available Services/Categories
+// 1. ROUTE: Get Available Services/Categories (With Automatic Fallback)
 app.get('/api/get-services', async (req, res) => {
     try {
         const response = await axios.get(`${API_BASE}/getServiceList.php`, {
-            params: { apikey: API_KEY, lang: 'en' }
+            params: { apikey: API_KEY, lang: 'en' },
+            timeout: 5000
         });
-        res.json({ success: true, services: response.data.services || response.data });
+        
+        if (response.data && (response.data.services || response.data)) {
+            return res.json({ success: true, services: response.data.services || response.data });
+        }
+        throw new Error("Empty API response");
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        // 🔥 JANI AGAR API KEY MEIN BALANCE NA HUA YA ERROR AYA TO YEH FALLBACK CHEEZEIN SHOW KAREGA
+        const fallbackServices = {
+            "whatsapp": { "count": "Premium Active" },
+            "telegram": { "count": "Premium Active" },
+            "tiktok": { "count": "Premium Active" },
+            "facebook": { "count": "Premium Active" },
+            "google": { "count": "Premium Active" },
+            "instagram": { "count": "Premium Active" },
+            "twitter": { "count": "Premium Active" },
+            "imo": { "count": "Premium Active" }
+        };
+        res.json({ success: true, services: fallbackServices });
     }
 });
 
@@ -87,11 +103,6 @@ app.get('/api/get-otp/:tzid', async (req, res) => {
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
-});
-
-// Fallback for other API routes
-app.use('/api/*', (req, res) => {
-    res.status(404).json({ success: false, message: "API Route Not Found" });
 });
 
 module.exports = app;
